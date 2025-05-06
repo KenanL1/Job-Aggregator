@@ -13,6 +13,7 @@ export interface Job {
 
 export interface JobFilters {
   keywords?: string;
+  exclude?: string;
   location?: string;
   posted_within?: string;
   site_names?: string[];

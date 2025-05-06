@@ -2,7 +2,7 @@
 import React, { useRef, useState } from "react";
 // import { fetchJobs } from "../api/jobs";
 import { Job, JobFilters } from "../types";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useEventSourceQuery from "../hooks/useEventSourceQuery";
 import { useAppDispatch } from "../store";
 import { openPreview } from "../store/Reducers/previewSlice";
@@ -15,9 +15,11 @@ const SearchResult: React.FC<{ filters: JobFilters }> = ({ filters }) => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
 
-  // Get visited jobs from React Query cache
-  const visitedJobs =
-    queryClient.getQueryData<Record<string, boolean>>(VISITED_JOBS_KEY) || {};
+  // Subscribe visited jobs from React Query cache
+  const { data: visitedJobs = {} } = useQuery<Record<string, boolean>>({
+    queryKey: VISITED_JOBS_KEY,
+    initialData: {},
+  });
 
   const {
     data: jobs = [] as Job[],

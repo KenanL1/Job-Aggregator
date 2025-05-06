@@ -7,6 +7,7 @@ import { triggerJobFeed } from "../api/jobs";
 const Main: React.FC = () => {
   const [filters, setFilters] = useState<JobFilters>({
     keywords: "software developer",
+    exclude: "",
     location: "toronto, ON",
     posted_within: "1",
     site_names: ["indeed"],
@@ -21,6 +22,7 @@ const Main: React.FC = () => {
       .map((checkbox) => (checkbox as HTMLInputElement).value);
     const updatedFilters: JobFilters = {
       keywords: keywords.current?.value || "software developer",
+      exclude: exclude.current?.value || "",
       location: location.current?.value || "toronto, ON",
       posted_within: posted_within.current?.value || "1",
       site_names: selected_sites || ["indeed"],
@@ -35,6 +37,7 @@ const Main: React.FC = () => {
   };
 
   const keywords = useRef<HTMLInputElement>(null);
+  const exclude = useRef<HTMLInputElement>(null);
   const location = useRef<HTMLInputElement>(null);
   const posted_within = useRef<HTMLSelectElement>(null);
   const site_names = useRef<HTMLDivElement>(null);
@@ -43,15 +46,27 @@ const Main: React.FC = () => {
     <div className="container p-4">
       <h1 className="text-3xl font-bold mb-4">Job Aggregator</h1>
       <form onSubmit={handleSubmit} id="jobForm" className="mb-6">
-        <div>
-          <label htmlFor="keyword">Job Title:</label>
-          <input
-            type="text"
-            id="keyword"
-            name="keyword"
-            placeholder="e.g., Software Developer"
-            ref={keywords}
-          />
+        <div className="flex gap-4">
+          <div>
+            <label htmlFor="keyword">Keywords:</label>
+            <input
+              type="text"
+              id="keyword"
+              name="keyword"
+              placeholder="e.g., Software Developer"
+              ref={keywords}
+            />
+          </div>
+          <div>
+            <label htmlFor="exclude">Exclude:</label>
+            <input
+              type="text"
+              id="exclude"
+              name="exclude"
+              placeholder="e.g., Software Developer"
+              ref={exclude}
+            />
+          </div>
         </div>
         <div>
           <label htmlFor="location">Location:</label>

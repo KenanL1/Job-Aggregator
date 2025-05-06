@@ -19,7 +19,7 @@ const useEventSourceQuery = (queryKey: [string, JobFilters], url: string) => {
       const eventData = JSON.parse(event.data);
       queryClient.setQueryData(
         stableQueryKey.current,
-        (oldData: Job[] = []) => [...oldData, ...eventData]
+        (oldData: Job[] = []) => [...eventData, ...oldData]
       );
     };
 

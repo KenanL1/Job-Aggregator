@@ -32,10 +32,10 @@ def register_routes(app):
     def start_scheduler():
         """Schedule event to retrieve new jobs listing every interval"""
         if scheduler.running:
-            scheduler.shutdown()
+            scheduler.remove_all_jobs()
         data = request.json
         # Create a partial function with the app context
-        job_function = partial(stream_new_jobs, app, data)
+        job_function = partial(stream_new_jobs, app, data['body'])
         scheduler.add_job(func=job_function,
                           trigger="interval", seconds=600)
         scheduler.start()

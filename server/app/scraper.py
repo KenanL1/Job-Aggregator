@@ -20,8 +20,10 @@ def scrape_jobs_with_jobspy(keyword, location, posted_within, site_names):
     jobs = scrape_jobs(
         site_name=site_names,
         search_term=keyword,  # developer
-        google_search_term="developer jobs near Toronto, ON since yesterday",
+        google_search_term=f"{keyword} jobs near {location} since yesterday",
         location=location,  # Toronto, ON
+        distance=50,  # in miles
+        # job_type, #fulltime, parttime, internship, contract
         results_wanted=100,  # Number of jobs to fetch
         hours_old=posted_within_days * 24,  # Convert days to hours
         include_promoted_jobs=False,  # Exclude promoted/sponsored jobs
@@ -94,14 +96,22 @@ def get_all_jobs():
     return jobs
 
 
+def contains_keyword(str, keywords):
+    for keyword in keywords:
+        if keyword in str:
+            return True
+    return False
+
+
 def stream_new_jobs(app, data):
     """SSE stream new jobs to client"""
     with app.app_context():
         keyword = data.get('keyword') or 'Software Developer'
+        exclude = data.get('exclude').split(",")
         location = data.get('location') or 'Toronto, ON'
         posted_within = data.get(
             'posted_within') or '0.25'  # Default: last 1 hour
-        site_names = data.get('site_names[]') or ['indeed']
+        site_names = data.get('site_names') or ['indeed']
         jobs = []
 
         # Scrape jobs based on user input
@@ -110,11 +120,15 @@ def stream_new_jobs(app, data):
                 keyword, location, posted_within, site_names)
 
         new_jobs = []
+        excluded = 0
         for job in jobs:
-            if add_job_posting(job):
+            if add_job_posting(job) and (not exclude or not contains_keyword(job["title"], exclude)):
                 new_jobs.append(job)
+            else:
+                excluded += 1
 
         # Return jobs as JSON
         # return jsonify(jobs)
-        print(f"Found {len(jobs)} new jobs")
+        print(
+            f"Found {len(new_jobs)} new jobs out of {len(jobs)} - Excluded jobs {excluded}")
         sse.publish(new_jobs, channel='test')
