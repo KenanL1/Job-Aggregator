@@ -107,6 +107,7 @@ def stream_new_jobs(app, data):
     """SSE stream new jobs to client"""
     with app.app_context():
         keyword = data.get('keyword') or 'Software Developer'
+        # Embedded, President, DevOps, Lead, Staff, Principal
         exclude = data.get('exclude').split(",")
         location = data.get('location') or 'Toronto, ON'
         posted_within = data.get(

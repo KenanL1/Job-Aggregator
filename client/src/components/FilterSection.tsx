@@ -7,7 +7,7 @@ const FilterSection = React.memo(
         <strong>Filter by Site:</strong>
         <br />
         <label>
-          <input type="checkbox" checked name="site_name" value="indeed" />{" "}
+          <input type="checkbox" name="site_name" value="indeed" />
           Indeed
         </label>
         <label>
