@@ -9,7 +9,10 @@ import { openPreview } from "../store/Reducers/previewSlice";
 
 const VISITED_JOBS_KEY = ["visitedJobs"] as const;
 
-const SearchResult: React.FC<{ filters: JobFilters }> = ({ filters }) => {
+const SearchResult: React.FC<{
+  filters: JobFilters;
+  setLastUpdated: (value: string) => void;
+}> = ({ filters, setLastUpdated }) => {
   const [showVisited, setShowVisited] = useState<boolean>(true);
   const selectedItem = useRef<HTMLElement>(null);
   const queryClient = useQueryClient();
@@ -27,35 +30,14 @@ const SearchResult: React.FC<{ filters: JobFilters }> = ({ filters }) => {
     isLoading,
   } = useEventSourceQuery(
     ["jobs", filters],
-    "http://localhost:5000/stream?channel=test"
+    "http://localhost:5000/stream?channel=test",
+    setLastUpdated
   );
 
   // Filter jobs based on visited status if needed
   const filteredJobs = showVisited
     ? jobs
     : jobs.filter((job) => !visitedJobs[job.id]);
-
-  // useEffect(() => {
-  //   dispatch(fetchJobPosts(filters));
-  // var source = new EventSource("http://localhost:5000/stream?channel=mychannel");
-  // source.addEventListener("message", function (event) {
-  //   var data = JSON.parse(event.data);
-  //   console.log("Received score:", data.score);
-  // });
-  // Cleanup the EventSource on component unmount
-  // return () => {
-  //   source.close();
-  // };
-  // }, [dispatch, filters]);
-
-  // const { isLoading, error } = useQuery({
-  //   queryKey: ["jobs", filters],
-  //   queryFn: async () => {
-  //     const data = await fetchJobs(filters);
-  //     dispatch(addJobs(data));
-  //   },
-  //   refetchInterval: 36000,
-  // });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -84,17 +66,26 @@ const SearchResult: React.FC<{ filters: JobFilters }> = ({ filters }) => {
     window.open(job_url);
   };
 
+  // Clear jobs lists
+  const clearResults = () => {
+    queryClient.setQueryData(["jobs", filters], []);
+    queryClient.setQueryData(VISITED_JOBS_KEY, {});
+  };
+
   return (
     <div className="flex flex-col grow max-w-[65%] space-y-4">
       <h2>Results:</h2>
-      <label className="flex items-center space-x-2">
-        <input
-          checked={showVisited}
-          onChange={() => setShowVisited(!showVisited)}
-          type="checkbox"
-        />
-        <span>Show visited jobs</span>
-      </label>
+      <div className="flex grow gap-3">
+        <label className="flex items-center space-x-2">
+          <input
+            checked={showVisited}
+            onChange={() => setShowVisited(!showVisited)}
+            type="checkbox"
+          />
+          <span>Show visited jobs</span>
+        </label>
+        <button onClick={clearResults}>Clear Results</button>
+      </div>
       {filteredJobs.length > 0 ? (
         <>
           <p>Total Jobs Found: {filteredJobs.length}</p>

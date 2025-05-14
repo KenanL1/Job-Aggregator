@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { JobFilters } from "../types";
 import FilterSection from "../components/FilterSection";
 import SearchResult from "../components/SearchResults";
@@ -11,19 +11,15 @@ import {
 const JOB_FILTERS_KEY = "jobFilters";
 
 const Main: React.FC = () => {
-  const [filters, setFilters] = useState<JobFilters>(() => {
-    const stored = getLocalStorageValue(JOB_FILTERS_KEY);
-    return stored
-      ? JSON.parse(stored)
-      : {
-          keywords: "software developer",
-          exclude: "",
-          location: "toronto, ON",
-          posted_within: "1",
-          site_names: ["indeed"],
-        };
+  const [filters, setFilters] = useState<JobFilters>({
+    keywords: "",
+    exclude: "",
+    location: "",
+    posted_within: "",
+    site_names: ["indeed"],
   });
   const [siteError, setSiteError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +59,30 @@ const Main: React.FC = () => {
   const posted_within = useRef<HTMLSelectElement>(null);
   const site_names = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const stored = getLocalStorageValue(JOB_FILTERS_KEY);
+    if (
+      keywords.current &&
+      exclude.current &&
+      location.current &&
+      posted_within.current &&
+      stored
+    ) {
+      const jobFilt: JobFilters = JSON.parse(stored);
+      keywords.current.value = jobFilt?.keywords || "";
+      exclude.current.value = jobFilt?.exclude || "";
+      location.current.value = jobFilt?.location || "";
+      posted_within.current.value = jobFilt?.posted_within || "";
+    }
+    setLastUpdated(getLocalStorageValue("lastUpdated"));
+  }, []);
+
   return (
-    <div className="container p-4">
-      <h1 className="text-3xl font-bold mb-4">Job Aggregator</h1>
+    <div className="container p-4 max-w-[65%]">
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold mb-4">Job Aggregator</h1>
+        <p className="mr-8">last updated: {lastUpdated}</p>
+      </div>
       <form onSubmit={handleSubmit} id="jobForm" className="mb-6">
         <div className="flex gap-4">
           <div>
@@ -134,7 +151,7 @@ const Main: React.FC = () => {
         </button>
       </form>
 
-      <SearchResult filters={filters} />
+      <SearchResult filters={filters} setLastUpdated={setLastUpdated} />
     </div>
   );
 };

@@ -2,7 +2,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { Job, JobFilters } from "../types";
 
-const useEventSourceQuery = (queryKey: [string, JobFilters], url: string) => {
+const useEventSourceQuery = (
+  queryKey: [string, JobFilters],
+  url: string,
+  setLastUpdated: (value: string) => void
+) => {
   const queryClient = useQueryClient();
   const stableQueryKey = useRef(queryKey);
 
@@ -21,6 +25,11 @@ const useEventSourceQuery = (queryKey: [string, JobFilters], url: string) => {
         stableQueryKey.current,
         (oldData: Job[] = []) => [...eventData, ...oldData]
       );
+
+      // Save the last updated time
+      const now = new Date().toISOString();
+      localStorage.setItem("lastUpdated", now);
+      setLastUpdated(now);
     };
 
     source.addEventListener("message", handleMessage);

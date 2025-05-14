@@ -1,14 +1,19 @@
+import logging
 from pydantic import BaseModel
 from typing import List, Optional
 from app import create_app
 from pyngrok import ngrok, conf
 from flask_sse import sse
-
 # conf.get_default().auth_token = '1vMdxJHbKQbVlirHYijs78xoSP0_2mVwPLwVauPfrMWo5S1MV'
 port = "5000"
 app = create_app()
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
     # Open a ngrok tunnel to the HTTP server
     # public_url = ngrok.connect(port).public_url
     # print(f" * ngrok tunnel \"{public_url}\" -> \"http://127.0.0.1:{port}\"")
